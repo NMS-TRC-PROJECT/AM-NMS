@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 public interface ServerRepository extends JpaRepository<Server, Long> {
     Server findByServerId(Long serverId);
 
+    Server findTopByIsActiveOrderByWorkStatusesAsc(String isActive);
+
     //@Modifying
 //    @Query(value = "update Server s set s.isActive = :isActive, s.updateDate = :updateDate  where s.serverId = :serverId")
 //    void updateServerStatus(@Param("serverId") Long serverId, @Param("isActive") String isActive, @Param("updateDate")LocalDateTime updateDate);

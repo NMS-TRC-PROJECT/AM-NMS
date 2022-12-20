@@ -1,11 +1,18 @@
 package com.project.study.common.util;
 
+//import org.json.simple.JSONObject;
+
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class HttpUtils {
+
+    // Http Get
     public static String sendGet(String url, int connTimeout, int readTimeout) throws Exception {
         String result = "";
 
@@ -35,6 +42,42 @@ public class HttpUtils {
         // sb로 만들어 놓은 결과 값 반환
         result = sb.toString();
 
+        return result;
+    }
+
+    // HTTP Post
+    public static String sendPost(String url, JSONObject jsonObject) throws Exception {
+        String result = "";
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        // add request header
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);  // urlconnection이 서버에 데이터를 보내는데 사용할 수 있는지 여부
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Accept", "application/json");
+        con.connect();
+
+        // send post request
+        byte[] outputBytes = jsonObject.toString().getBytes("UTF-8");
+        OutputStream os = con.getOutputStream();
+        os.write(outputBytes);
+        os.flush();
+        os.close();
+        outputBytes = null;
+
+        int responseCode = con.getResponseCode();
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null ){
+            response.append(inputLine);
+        }
+        in.close();
+
+        //print result
+        result = response.toString();
         return result;
     }
 }
