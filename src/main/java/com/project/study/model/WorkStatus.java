@@ -1,22 +1,22 @@
 package com.project.study.model;
 
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter @Setter
 @Table(name = "tb_work_status")
 public class WorkStatus {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "transaction_id")
-    private Long transactionId;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name="uuid", strategy = "uuid2")
+    @Column(name = "transaction_id", unique = true)
+    private String transactionId;
 
     @Column(name = "frames")
     private int frames;
@@ -49,4 +49,8 @@ public class WorkStatus {
     @OneToOne
     @JoinColumn(name = "output_id")
     private Output output;
+
+    @ManyToOne(fetch = FetchType.LAZY)  // 검색 시 충돌 방지
+    @JoinColumn(name = "server_id")
+    private Server server;
 }

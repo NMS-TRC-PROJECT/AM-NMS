@@ -1,13 +1,15 @@
 package com.project.study.model;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
+@Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "tb_output_preset")
 public class Output {
@@ -16,6 +18,9 @@ public class Output {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "output_id")
     private Long outputId;
+
+    @Column(name = "output_filename")
+    private String outputFileName;
 
     @Column(name = "output_folder")
     private String outputFolder;

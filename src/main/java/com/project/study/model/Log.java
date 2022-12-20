@@ -18,7 +18,7 @@ public class Log {
     @Column(name = "log_id")
     private Long logId;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "server_id")
     private Server server;
 

@@ -1,11 +1,12 @@
 package com.project.study.model;
 
-//import com.project.study.dto.ServerReqDto;
-import lombok.*;
-import org.springframework.util.Assert;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -59,8 +60,11 @@ public class Server {
 //    }
 
     // 연관 관계 매핑
-    @OneToOne(mappedBy = "server", cascade = CascadeType.ALL)
-    private Log log;
+    @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)
+    private List<Log> log = new ArrayList<>();
+
+    @OneToMany(mappedBy = "server")
+    private List<WorkStatus> workStatuses = new ArrayList<>();
 
     @Override
     public String toString() {
