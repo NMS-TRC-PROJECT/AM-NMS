@@ -5,12 +5,11 @@ import com.project.study.common.util.HttpUtils;
 import com.project.study.dao.InputDao;
 import com.project.study.dao.OutputDao;
 import com.project.study.dto.TranscodeReqDto;
+import com.project.study.dto.WorkStatusRespDto;
 import com.project.study.model.Input;
 import com.project.study.model.Output;
 import com.project.study.model.Server;
 import com.project.study.model.WorkStatus;
-import com.project.study.repository.InputRepository;
-import com.project.study.repository.OutputRepository;
 import com.project.study.repository.ServerRepository;
 import com.project.study.repository.WorkStatusRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,24 +18,25 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static java.time.LocalDateTime.now;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class TranscodeService {
+
+    private final ServerService serverService;  // 서버 관련된 메소드를 묶으려고 이렇게 참조하긴 했는데.. 과연 이게 괜찮을까..?
     private final WorkStatusRepository workStatusRepository;
     private final ServerRepository serverRepository;
-    private final InputRepository inputRepository;
-    private final OutputRepository outputRepository;
     private final InputDao inputDao;
     private final OutputDao outputDao;
 
 
-    // TRC VOD 서버 조회
+    // TRC VOD 서버 조회            -> serverservice로 옮김
     private Server checkAvailableSvr(){
         Server serverInfo = null;
 
@@ -58,7 +58,7 @@ public class TranscodeService {
     public JSONObject requestTrcVod() {
         JSONObject result = new JSONObject();
         WorkStatus workStatus = new WorkStatus();
-        TranscodeReqDto dto = new TranscodeReqDto();
+        TranscodeReqDto dto;
 
         // transaction id 만들기
         UUID uuid = UUID.randomUUID();
@@ -67,7 +67,7 @@ public class TranscodeService {
 
         try {
             // 할당 가능한 TRC 서버 조회
-            Server availableSvr = checkAvailableSvr();
+            Server availableSvr = serverService.checkAvailableSvr();
 
             // 1. dto에 input, output, video, audio 정보를 담기
             // input, output id = 일단 1L
@@ -83,10 +83,10 @@ public class TranscodeService {
             // 2. 작업상태 테이블(tb_work_status)에 저장
             // transactionId, create_date, output_filename, status, update_date, input_id, output_id, server_id
             workStatus.setTransactionId(transactionId);
-            workStatus.setCreateDate(LocalDateTime.now());
-            workStatus.setOutputFileName(outputOp.getOutputFileName());
+            workStatus.setCreateDate(now());
+            workStatus.setOutputFilename(outputOp.getOutputFileName());
             workStatus.setStatus(1);
-            workStatus.setUpdateDate(LocalDateTime.now()); // 이게 맞아..? 수정하면 어쩔래
+            workStatus.setUpdateDate(now()); // 이게 맞아..? 수정하면 어쩔래
             workStatus.setInput(inputOp);
             workStatus.setOutput(outputOp);
             workStatus.setServer(availableSvr);
@@ -117,7 +117,7 @@ public class TranscodeService {
         TranscodeReqDto dto = new TranscodeReqDto();
         log.info("getTranscodeReqDto 시작");
 
-        Map<String, Object> presetDto = null;
+        Map<String, Object> presetDto;
         try {
             // basic -> object 타입으로 선언
             presetDto = new HashMap<>();
@@ -154,5 +154,46 @@ public class TranscodeService {
             e.printStackTrace();
         }
         return dto;
+    }
+
+    @Transactional
+    public JSONObject updateVodTrcStatus(/*String transactionId, */ WorkStatusRespDto workStatus) {
+//        status = 0 -> 완료
+//                percentage : 100
+//        status = 1 -> 대기
+//        status = 2 -> 진행중
+//                percentage, speed, frames 업데이트
+//        status = 3 -> 취소
+//        status = -1 -> 에러
+//                errorString, percentage, speed, frames 업데이트
+
+        // 일단 해당 transactionId로 Workstatus찾아야해!
+        WorkStatus workStatus2 = workStatusRepository.findByTransactionId(workStatus.getTransactionId());
+        JSONObject resultJson = new JSONObject();
+
+        workStatus2.setUpdateDate(now());
+        try {
+            if (workStatus.getStatus() == 0) {
+                workStatus2.setPercentage("100");
+            } else {
+                workStatus2.setPercentage(workStatus.getPercentage());
+                workStatus2.setSpeed(workStatus.getSpeed());
+                workStatus2.setFrames(workStatus.getFrames());
+                workStatus2.setErrorString(workStatus.getErrorString());
+                workStatus2.setStatus(workStatus.getStatus());
+                workStatus2.setOutputFilename(workStatus.getTranscodes().get(0).get("outputFilename").toString());
+            }
+            workStatusRepository.save(workStatus2);
+            log.info("작업 상태 업데이트 완료");
+            resultJson.put("resultCode", 200);
+            resultJson.put("errorString", "");  // 이거 해야하는 건가여!??!!!!?!?!?!
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultJson.put("resultCode", 500);
+            resultJson.put("errorString", e.toString());
+            log.info("service catched - 업데이트 실패");
+        }
+
+        return resultJson;
     }
 }

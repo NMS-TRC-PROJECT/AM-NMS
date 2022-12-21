@@ -34,7 +34,7 @@ public class WorkStatus {
     private String percentage;
 
     @Column(name = "output_filename")
-    private String outputFileName;
+    private String outputFilename;
 
     @Column(name = "create_date")
     private LocalDateTime createDate;

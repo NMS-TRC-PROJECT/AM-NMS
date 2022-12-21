@@ -25,7 +25,7 @@ public class ServerService {
     @Transactional(rollbackOn = RuntimeException.class) // 런타임 예외 발생 시 롤백
     public void checkServerStatus(Long serverId) {
         Server serverVo = serverRepository.findById(serverId).orElseThrow(() -> new ServerNotFoundException(serverId));
-        String sendUrl = "";
+        String sendUrl;
 
         // 로그 저장 용 ------> 로그 일단 좀 뒤에 하자
 //        Log logVO = null;
@@ -59,5 +59,26 @@ public class ServerService {
             log.info("서버 업데이트 실패");
             e.printStackTrace();
         }
+    }
+
+    // TRC VOD 서버 조회
+    public Server checkAvailableSvr(){
+        Server serverInfo = null;
+
+        try{
+            serverInfo = serverRepository.findTopByIsActiveOrderByWorkStatusesAsc("1");
+            log.info("사용 가능한 서버 찾았음 : " + serverInfo.getServerIp());
+        } catch (Exception e){
+            e.printStackTrace();
+            log.info("사용 가능한 서버 못 찾음");
+        }
+
+        return serverInfo;
+    }
+
+    // Server Id로 Server 객체 가져오기
+    public Server getServer(Long serverId) {
+        
+        return serverRepository.findById(serverId).orElseThrow(() -> new ServerNotFoundException(serverId));
     }
 }
