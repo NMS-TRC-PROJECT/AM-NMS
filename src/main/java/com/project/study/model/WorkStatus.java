@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 public class WorkStatus {
 
     @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name="uuid", strategy = "uuid2")
     @Column(name = "transaction_id", unique = true)
     private String transactionId;
 

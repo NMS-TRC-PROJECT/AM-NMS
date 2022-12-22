@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -53,7 +54,6 @@ public class TranscodeService {
 
     // NMS -> TRC
     // 작업 요청
-    // 회원가입 페이지(나) -post-> 회원가입 로직(상현)
     @Transactional
     public JSONObject requestTrcVod() {
         JSONObject result = new JSONObject();
@@ -157,7 +157,7 @@ public class TranscodeService {
     }
 
     @Transactional
-    public JSONObject updateVodTrcStatus(/*String transactionId, */ WorkStatusRespDto workStatus) {
+    public JSONObject updateVodTrcStatus(WorkStatusRespDto workStatus) {
 //        status = 0 -> 완료
 //                percentage : 100
 //        status = 1 -> 대기
@@ -194,6 +194,38 @@ public class TranscodeService {
             log.info("service catched - 업데이트 실패");
         }
 
+        return resultJson;
+    }
+//
+//    public WorkStatus findByTransactionID(String transactionId) {
+//        return workStatusRepository.findByTransactionId(transactionId);
+//    }
+
+    @Transactional
+    public JSONObject cancelVODTranscoding(String transactionId) throws IOException {
+        JSONObject resultJson = new JSONObject();
+        WorkStatus workStatus = workStatusRepository.findByTransactionId(transactionId);
+
+        if (workStatus != null){
+            workStatus.setStatus(3);
+            workStatus.setErrorString("취소된 작업");
+            workStatus.setUpdateDate(now());
+
+                // 3. Transcoder로 취소 지시
+                log.info("transcoder로 취소 지시");
+                String response = HttpUtils.sendRequest("http://"+workStatus.getServer().getServerIp()+":"+workStatus.getServer().getServerPort()+APIUrl.TR_CTRL_VOD_URL+"/"+transactionId, "DELETE");
+                log.info("response : " + response);
+                resultJson = new JSONObject(response);
+
+                if (resultJson.getInt("resultCode") == 200 || resultJson.getInt("resultCode") == 201) {
+                    resultJson.put("resultCode", "200");
+                    workStatusRepository.save(workStatus);
+                }
+
+        } else {
+            resultJson.put("resultCode", "404");
+            log.info("해당 transactionId의 작업이 존재하지 않음");
+        }
         return resultJson;
     }
 }

@@ -8,10 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,6 +67,31 @@ public class TranscodeController {
 
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 
+        }
+    }
+
+    // NMS -> TRC
+    // VOD 작업 취소 요청
+    @DeleteMapping(value = "/transcoder/vod/{transactionId}")
+    public ResponseEntity<?> cancelVodTranscoding(@PathVariable String transactionId){
+        try {
+            log.info("VOD 트랜스코딩 작업 취소 요청 시작");
+            JSONObject resultJson = transcodeService.cancelVODTranscoding(transactionId);
+
+            if (resultJson.get("resultCode") == "200") {
+                log.info("OK : VOD 트랜스코딩 작업 취소 요청 완료");
+                return new ResponseEntity<>(HttpStatus.OK);
+            } else if (resultJson.get("resultCode") == "404"){
+                log.info("NOT_FOUND : VOD 트랜스코딩 작업 취소 요청 실패");
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            } else {
+                log.info("INTERNAL_SERVER_ERROR : VOD 트랜스코딩 작업 취소 요청 실패");
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("INTERNAL_SERVER_ERROR : VOD 트랜스코딩 작업 취소 요청 실패");
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
