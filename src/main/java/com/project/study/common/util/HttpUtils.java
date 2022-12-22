@@ -5,6 +5,7 @@ package com.project.study.common.util;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -79,5 +80,36 @@ public class HttpUtils {
         //print result
         result = response.toString();
         return result;
+    }
+
+    // HTTP Request
+    public static String sendRequest(String url, String method) throws IOException {
+        String result = "";
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        // add request header
+        con.setRequestMethod(method);
+        con.setDoOutput(true); // urlconnection이 서버에 데이터를 보내는데 사용할 수 있는지 여부
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Accept", "application/json");
+        con.connect();
+
+        int responseCode = con.getResponseCode();
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream(),"UTF-8"));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        result = response.toString();
+
+        return result;
+
     }
 }
