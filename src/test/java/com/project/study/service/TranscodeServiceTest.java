@@ -11,11 +11,13 @@ import org.springframework.test.annotation.Rollback;
 
 import javax.transaction.Transactional;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @Transactional
-@Rollback
+//@Rollback
 class TranscodeServiceTest {
 
     @Autowired
@@ -44,7 +46,19 @@ class TranscodeServiceTest {
         workStatus.setStatus(2);
 
         // when
-        transcodeService.updateVodTrcStatus(workStatus);  //테스트 후에 DTO를 도입함 ㅋㅅㅋ 나는야 몽총잉
+//        transcodeService.updateVodTrcStatus(workStatus);  //테스트 후에 DTO를 도입함 ㅋㅅㅋ 나는야 몽총잉
+
+        // then
+
+    }
+
+    @Test
+    @DisplayName("VOD 작업 취소 요청 테스트")
+    void cancelVODJob() throws IOException {
+        // given
+        String transactionId = "0bdd0854-8c61-4db5-89f7-c66bc3b55f58";
+        // when
+        transcodeService.cancelVODTranscoding(transactionId);
 
         // then
 
