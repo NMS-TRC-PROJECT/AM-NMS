@@ -173,16 +173,13 @@ public class TranscodeService {
 
         workStatus2.setUpdateDate(now());
         try {
-            if (workStatus.getStatus() == 0) {
-                workStatus2.setPercentage("100");
-            } else {
-                workStatus2.setPercentage(workStatus.getPercentage());
-                workStatus2.setSpeed(workStatus.getSpeed());
-                workStatus2.setFrames(workStatus.getFrames());
-                workStatus2.setErrorString(workStatus.getErrorString());
-                workStatus2.setStatus(workStatus.getStatus());
-                workStatus2.setOutputFilename(workStatus.getTranscodes().get(0).get("outputFilename").toString());
-            }
+            workStatus2.setPercentage(workStatus.getPercentage());
+            workStatus2.setSpeed(workStatus.getSpeed());
+            workStatus2.setFrames(workStatus.getFrames());
+            workStatus2.setErrorString(workStatus.getErrorString());
+            workStatus2.setStatus(workStatus.getStatus());
+            workStatus2.setOutputFilename(workStatus.getTranscodes().get(0).get("outputFilename").toString());
+
             workStatusRepository.save(workStatus2);
             log.info("작업 상태 업데이트 완료");
             resultJson.put("resultCode", 200);
@@ -196,10 +193,6 @@ public class TranscodeService {
 
         return resultJson;
     }
-//
-//    public WorkStatus findByTransactionID(String transactionId) {
-//        return workStatusRepository.findByTransactionId(transactionId);
-//    }
 
     @Transactional
     public JSONObject cancelVODTranscoding(String transactionId) throws IOException {
