@@ -199,7 +199,7 @@ public class TranscodeService {
         JSONObject resultJson = new JSONObject();
         WorkStatus workStatus = workStatusRepository.findByTransactionId(transactionId);
 
-        if (workStatus != null){
+        if (workStatus != null && workStatus.getStatus() != 0){
             workStatus.setStatus(3);
             workStatus.setErrorString("취소된 작업");
             workStatus.setUpdateDate(now());
