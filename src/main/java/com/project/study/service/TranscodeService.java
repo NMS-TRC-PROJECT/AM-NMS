@@ -171,24 +171,31 @@ public class TranscodeService {
         WorkStatus workStatus2 = workStatusRepository.findByTransactionId(workStatus.getTransactionId());
         JSONObject resultJson = new JSONObject();
 
-        workStatus2.setUpdateDate(now());
-        try {
-            workStatus2.setPercentage(workStatus.getPercentage());
-            workStatus2.setSpeed(workStatus.getSpeed());
-            workStatus2.setFrames(workStatus.getFrames());
-            workStatus2.setErrorString(workStatus.getErrorString());
-            workStatus2.setStatus(workStatus.getStatus());
-            workStatus2.setOutputFilename(workStatus.getTranscodes().get(0).get("outputFilename").toString());
+        if (workStatus2 == null) {
+            log.info("잘못된 transactionId로 작업 상태 업데이트 실패");
+            resultJson.put("resultCode", 404);
+            resultJson.put("errorString", String.format("transactionId %s 는 존재하지 않습니다.", workStatus.getTransactionId()));
+        } else {
+            workStatus2.setUpdateDate(now());
 
-            workStatusRepository.save(workStatus2);
-            log.info("작업 상태 업데이트 완료");
-            resultJson.put("resultCode", 200);
-            resultJson.put("errorString", "");  // 이거 해야하는 건가여!??!!!!?!?!?!
-        } catch (Exception e) {
-            e.printStackTrace();
-            resultJson.put("resultCode", 500);
-            resultJson.put("errorString", e.toString());
-            log.info("service catched - 업데이트 실패");
+            try {
+                workStatus2.setPercentage(workStatus.getPercentage());
+                workStatus2.setSpeed(workStatus.getSpeed());
+                workStatus2.setFrames(workStatus.getFrames());
+                workStatus2.setErrorString(workStatus.getErrorString());
+                workStatus2.setStatus(workStatus.getStatus());
+                workStatus2.setOutputFilename(workStatus.getTranscodes().get(0).get("outputFilename").toString());
+
+                workStatusRepository.save(workStatus2);
+                log.info("작업 상태 업데이트 완료");
+                resultJson.put("resultCode", 200);
+                resultJson.put("errorString", "");  // 이거 해야하는 건가여!??!!!!?!?!?!
+            } catch (Exception e) {
+                e.printStackTrace();
+                resultJson.put("resultCode", 500);
+                resultJson.put("errorString", e.toString());
+                log.info("service catched - 업데이트 실패");
+            }
         }
 
         return resultJson;

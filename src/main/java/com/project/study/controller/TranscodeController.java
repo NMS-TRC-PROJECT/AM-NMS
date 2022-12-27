@@ -55,12 +55,13 @@ public class TranscodeController {
 
         JSONObject resultJson;
         try{
-            
-            // 오류 잡기
+
             resultJson = transcodeService.updateVodTrcStatus(workStatus);
-
-            return new ResponseEntity<>(resultJson.toString(), HttpStatus.OK);
-
+            if (resultJson.get("resultCode") == "404") {
+                return new ResponseEntity<>(resultJson.toString(), HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(resultJson.toString(), HttpStatus.OK);
+            }
         }  catch (Exception e){
             e.printStackTrace();
             log.info("updateVodTrcStatus - 작업 상태 업데이트 실패");
