@@ -36,7 +36,6 @@ public class HttpUtils {
 
         while((inputLine = br.readLine()) != null){
             sb.append(inputLine);
-            System.out.println("HTTPUtils sb : " + sb);
         }
         br.close();
 

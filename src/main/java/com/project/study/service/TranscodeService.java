@@ -15,6 +15,9 @@ import com.project.study.repository.WorkStatusRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -79,6 +82,7 @@ public class TranscodeService {
 
             dto = this.getTranscodeReqDto(inputOp, outputOp);
             dto.setTransactionId(transactionId);
+            dto.setServiceType("ffmpegTRC_1");
 
             // 2. 작업상태 테이블(tb_work_status)에 저장
             // transactionId, create_date, output_filename, status, update_date, input_id, output_id, server_id
@@ -128,6 +132,7 @@ public class TranscodeService {
 
             dto.setBasic(presetDto);
 
+            // Object가 아니라 array로 바꾼다면?!
             // outputs -> Object 타입으로 선언
             presetDto = new HashMap<>();
             presetDto.put("container", output.getContainer());
@@ -227,5 +232,11 @@ public class TranscodeService {
             log.info("해당 transactionId의 작업이 존재하지 않음");
         }
         return resultJson;
+    }
+
+    public Page<WorkStatus> findWorkStatusPaging(int page) {
+        Pageable pageable = PageRequest.of(page, 5);
+        log.info("job list 가지고 넘어가요");
+        return workStatusRepository.findAll(pageable);
     }
 }

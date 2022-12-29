@@ -7,6 +7,9 @@ import com.project.study.model.Server;
 import com.project.study.repository.ServerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +50,7 @@ public class ServerService {
             serverVo.setIsActive("0");
             log.info("서버 끊김");
 
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         serverVo.setUpdateDate(LocalDateTime.now());
 
@@ -80,5 +83,12 @@ public class ServerService {
     public Server getServer(Long serverId) {
         
         return serverRepository.findById(serverId).orElseThrow(() -> new ServerNotFoundException(serverId));
+    }
+
+    // ServerList + Paging
+    public Page<Server> findServerPaging(int page) {
+        Pageable pageable = PageRequest.of(page, 5);
+        log.info("server list 가지고 넘어가요");
+        return serverRepository.findAll(pageable);
     }
 }
