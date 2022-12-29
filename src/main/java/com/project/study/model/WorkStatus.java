@@ -1,5 +1,6 @@
 package com.project.study.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -48,6 +49,7 @@ public class WorkStatus {
     @JoinColumn(name = "output_id")
     private Output output;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)  // 검색 시 충돌 방지
     @JoinColumn(name = "server_id")
     private Server server;

@@ -1,5 +1,6 @@
 package com.project.study.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -60,9 +61,11 @@ public class Server {
 //    }
 
     // 연관 관계 매핑
+    @JsonIgnore
     @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)
     private List<Log> log = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "server")
     private List<WorkStatus> workStatuses = new ArrayList<>();
 
