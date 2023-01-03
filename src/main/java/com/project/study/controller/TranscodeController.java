@@ -74,7 +74,7 @@ public class TranscodeController {
     // NMS -> TRC
     // VOD 작업 취소 요청
     @DeleteMapping(value = "/transcoder/vod/{transactionId}")
-    public ResponseEntity<?> cancelVodTranscoding(@PathVariable String transactionId){
+    public ResponseEntity<?> cancelVodTranscoding(@PathVariable String transactionId) {
         try {
             log.info("VOD 트랜스코딩 작업 취소 요청 시작");
             JSONObject resultJson = transcodeService.cancelVODTranscoding(transactionId);

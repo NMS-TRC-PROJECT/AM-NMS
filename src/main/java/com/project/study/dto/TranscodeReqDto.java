@@ -17,6 +17,8 @@ public class TranscodeReqDto {
     private Object outputs;
     private Object basic;
 
+    private String serviceType;
+
 
     public TranscodeReqDto(){}
 

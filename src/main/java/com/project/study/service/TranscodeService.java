@@ -82,7 +82,7 @@ public class TranscodeService {
 
             dto = this.getTranscodeReqDto(inputOp, outputOp);
             dto.setTransactionId(transactionId);
-            dto.setServiceType("ffmpegTRC_1");
+            dto.setServiceType("ffmpegTRC_2");
 
             // 2. 작업상태 테이블(tb_work_status)에 저장
             // transactionId, create_date, output_filename, status, update_date, input_id, output_id, server_id
@@ -176,8 +176,12 @@ public class TranscodeService {
         WorkStatus workStatus2 = workStatusRepository.findByTransactionId(workStatus.getTransactionId());
         JSONObject resultJson = new JSONObject();
 
+        Exception ex = null;
+
         if (workStatus2 == null) {
             log.info("잘못된 transactionId로 작업 상태 업데이트 실패");
+            ex = new Exception();
+
             resultJson.put("resultCode", 404);
             resultJson.put("errorString", String.format("transactionId %s 는 존재하지 않습니다.", workStatus.getTransactionId()));
         } else {
@@ -193,15 +197,14 @@ public class TranscodeService {
 
                 workStatusRepository.save(workStatus2);
                 log.info("작업 상태 업데이트 완료");
-                resultJson.put("resultCode", 200);
-                resultJson.put("errorString", "");  // 이거 해야하는 건가여!??!!!!?!?!?!
             } catch (Exception e) {
                 e.printStackTrace();
-                resultJson.put("resultCode", 500);
-                resultJson.put("errorString", e.toString());
+                ex = e;
                 log.info("service catched - 업데이트 실패");
             }
         }
+        resultJson.put("resultCode", ex==null ? 200 : 500);
+        resultJson.put("errorString", ex==null ? "" : ex.toString());
 
         return resultJson;
     }
