@@ -3,7 +3,6 @@ package com.project.study.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -40,6 +39,9 @@ public class WorkStatus {
 
     @Column(name = "update_date")
     private LocalDateTime updateDate;
+
+    @Column(name = "service_type")
+    private String serviceType;
 
     @OneToOne
     @JoinColumn(name = "input_id")
