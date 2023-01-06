@@ -37,29 +37,6 @@ public class Server {
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
-//    // 서버 내용 전체용 (insert 할 때 주로 사용)
-//    @Builder(builderClassName = "serverAllBuilder", builderMethodName = "serverAllBuilder")
-//    public Server(ServerReqDto serverReqDto){
-////        Assert.hasText(String.valueOf(serverId), "서버아이디는 [null]이 될 수 없습니다.");
-////        Assert.hasText(serverName, "서버이름은 [null]이 될 수 없습니다.");
-////        Assert.hasText(String.valueOf(serverPort), "서버포트는 [null]이 될 수 없습니다.");
-////        Assert.hasText(serverIp, "서버IP는 [null]이 될 수 없습니다.");
-////        Assert.hasText(isActive, "서버활성화여부는 [null]이 될 수 없습니다.");
-//
-//        this.serverId = serverReqDto.getServerId();
-//        this.serverName = serverName;
-//        this.serverPort = serverPort;
-//        this.serverIp = serverIp;
-//        this.isActive = isActive;
-//    }
-//
-//    // 서버 상태 업데이트용 (update 할 때 주로 사용)
-//    @Builder(builderClassName = "serverUpdateBuilder", builderMethodName = "serverUpdateBuilder")
-//    public Server(String isActive){
-//        Assert.hasText(String.valueOf(isActive), "서버활성화여부는 [null]이 될 수 없습니다.");
-//        this.isActive = isActive;
-//    }
-
     // 연관 관계 매핑
     @JsonIgnore
     @OneToMany(mappedBy = "server", cascade = CascadeType.ALL)

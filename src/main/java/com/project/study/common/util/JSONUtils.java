@@ -2,9 +2,7 @@ package com.project.study.common.util;
 
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class JSONUtils {
 

@@ -30,11 +30,6 @@ public class ServerService {
         Server serverVo = serverRepository.findById(serverId).orElseThrow(() -> new ServerNotFoundException(serverId));
         String sendUrl;
 
-        // 로그 저장 용 ------> 로그 일단 좀 뒤에 하자
-//        Log logVO = null;
-//        String logStatus = "";
-//        String logInfo = "";
-
         try {
             // 서버 상태 냅다 받기 (Id, Ip, port는 항상 동일하니까 이렇게 줘도 됨!)
             sendUrl = "http://" + serverVo.getServerIp()+ ":"+serverVo.getServerPort()+ APIUrl.TR_SERVER_STATUS_URL;
@@ -42,15 +37,12 @@ public class ServerService {
 
             // set server status
             serverVo.setIsActive("1");
-//            logStatus = "3";
             log.info("서버 정상");
 
         } catch (Exception e){
             // set server status
             serverVo.setIsActive("0");
             log.info("서버 끊김");
-
-//            e.printStackTrace();
         }
         serverVo.setUpdateDate(LocalDateTime.now());
 
