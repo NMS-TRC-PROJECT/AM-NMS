@@ -22,9 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static java.time.LocalDateTime.now;
 
@@ -38,22 +36,6 @@ public class TranscodeService {
     private final ServerRepository serverRepository;
     private final InputDao inputDao;
     private final OutputDao outputDao;
-
-
-    // TRC VOD 서버 조회            -> serverservice로 옮김
-    private Server checkAvailableSvr(){
-        Server serverInfo = null;
-
-        try{
-            serverInfo = serverRepository.findTopByIsActiveOrderByWorkStatusesAsc("1");
-            log.info("사용 가능한 서버 찾았음 : " + serverInfo.getServerIp());
-        } catch (Exception e){
-            e.printStackTrace();
-            log.info("사용 가능한 서버 못 찾음");
-        }
-
-        return serverInfo;
-    }
 
     // NMS -> TRC
     // 작업 요청
@@ -76,13 +58,14 @@ public class TranscodeService {
             // input, output id = 일단 1L
             long inputID = 1L;
             long outputID = 1L;
+            String serviceType = "ffmpegTRC_2";
 
             Input inputOp = inputDao.getInput(inputID);
             Output outputOp = outputDao.getOutput(outputID);
 
             dto = this.getTranscodeReqDto(inputOp, outputOp);
             dto.setTransactionId(transactionId);
-            dto.setServiceType("ffmpegTRC_2");
+            dto.setServiceType(serviceType);
 
             // 2. 작업상태 테이블(tb_work_status)에 저장
             // transactionId, create_date, output_filename, status, update_date, input_id, output_id, server_id
@@ -94,6 +77,7 @@ public class TranscodeService {
             workStatus.setInput(inputOp);
             workStatus.setOutput(outputOp);
             workStatus.setServer(availableSvr);
+            workStatus.setServiceType(serviceType);
 
             workStatusRepository.save(workStatus);
             log.info("작업 상태 저장 완료");
@@ -221,6 +205,7 @@ public class TranscodeService {
 
                 // 3. Transcoder로 취소 지시
                 log.info("transcoder로 취소 지시");
+                log.info(workStatus.getTransactionId());
                 String response = HttpUtils.sendRequest("http://"+workStatus.getServer().getServerIp()+":"+workStatus.getServer().getServerPort()+APIUrl.TR_CTRL_VOD_URL+"/"+transactionId, "DELETE");
                 log.info("response : " + response);
                 resultJson = new JSONObject(response);
@@ -237,9 +222,32 @@ public class TranscodeService {
         return resultJson;
     }
 
-    public Page<WorkStatus> findWorkStatusPaging(int page) {
-        Pageable pageable = PageRequest.of(page, 5);
-        log.info("job list 가지고 넘어가요");
-        return workStatusRepository.findAll(pageable);
+    public List<WorkStatus> findWorkStatus() {
+        return workStatusRepository.findAllByOrderByUpdateDateDesc();
+    }
+
+    // 대시보드용 진행중인 job만 가져오기
+    public List<WorkStatusRespDto> findWorkStatusByStatus(){
+        List<WorkStatusRespDto> dtoList = new ArrayList<>();
+        List<WorkStatus> originList = workStatusRepository.findByStatusAndUpdateDateAfterOrderByUpdateDateDesc(2, now().minusDays(1));
+        for (int i=0; i<originList.size(); i++) {
+            WorkStatusRespDto dto = new WorkStatusRespDto();
+            dto.setServerId(originList.get(i).getServer().getServerId());
+            dto.setTransactionId(originList.get(i).getTransactionId());
+            dto.setStatus(originList.get(i).getStatus());
+            dto.setPercentage(originList.get(i).getPercentage());
+            dto.setUpdateDate(originList.get(i).getUpdateDate());
+            dtoList.add(i,dto);
+        }
+
+        return dtoList;
+    }
+
+    public List<Input> getInputPresetList(){
+        return inputDao.getAllInput();
+    }
+
+    public List<Output> getOutputPresetList() {
+        return outputDao.getAllOutput();
     }
 }

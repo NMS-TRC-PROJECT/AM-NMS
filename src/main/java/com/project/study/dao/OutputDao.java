@@ -5,6 +5,7 @@ import com.project.study.repository.OutputRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -23,4 +24,12 @@ public class OutputDao {
     }
 
 
+    public List<Output> getAllOutput() {
+        List<Output> outputList = outputRepository.findAll();
+        if (outputList.isEmpty()) {
+            throw new NullPointerException("output 정보가 없습니다.");
+        } else {
+            return outputList;
+        }
+    }
 }
